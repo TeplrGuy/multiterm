@@ -212,12 +212,17 @@ func ConfigureSession(session string) {
 	_ = SetOption(session, "pane-border-format", " #{pane_title} ")
 	_ = SetOption(session, "status-left", " ✦ multiterm ")
 	_ = SetOption(session, "status-style", "bg=colour236,fg=colour75")
-	_ = SetOption(session, "status-right", " Ctrl-b B: sync │ Ctrl-b d: detach ")
-	_ = SetOption(session, "status-right-length", "50")
+	_ = SetOption(session, "status-right", " ^b A: add pane │ ^b B: sync │ ^b d: detach ")
+	_ = SetOption(session, "status-right-length", "60")
 
 	// Bind Ctrl-b B to toggle synchronize-panes.
 	_ = runSilent("bind-key", "-T", "prefix", "B",
 		"set-window-option", "synchronize-panes")
+
+	// Bind Ctrl-b A to split a new pane and auto-tile.
+	_ = runSilent("bind-key", "-T", "prefix", "A",
+		"split-window", "-v", "\\;",
+		"select-layout", "tiled")
 }
 
 // SelectPane sets the active pane in the session.

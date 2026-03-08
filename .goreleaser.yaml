@@ -37,6 +37,8 @@ brews:
   - repository:
       owner: TeplrGuy
       name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    skip_upload: auto
     homepage: "https://github.com/TeplrGuy/multiterm"
     description: "Open multiple terminal panes instantly with smart layouts"
     license: "MIT"

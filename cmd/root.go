@@ -201,7 +201,7 @@ func runRoot(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Printf("✦ multiterm — %d panes [%s] session: %s\n", paneCount, layoutName, sessionName)
-	fmt.Println("  Click any pane │ Ctrl-b B: toggle sync │ Ctrl-b d: detach")
+	fmt.Println("  Click any pane │ Ctrl-b A: add pane │ Ctrl-b B: sync │ Ctrl-b d: detach")
 
 	_ = tmux.SelectPane(sessionName, paneIDs[0])
 	return tmux.AttachSession(sessionName)
@@ -305,7 +305,7 @@ func runSSHMultiHost(cfg *config.Config) error {
 	}
 
 	fmt.Printf("✦ multiterm — %d hosts [%s] session: %s\n", paneCount, layoutName, sessionName)
-	fmt.Println("  Click any pane │ Ctrl-b B: toggle sync │ Ctrl-b d: detach")
+	fmt.Println("  Click any pane │ Ctrl-b A: add pane │ Ctrl-b B: sync │ Ctrl-b d: detach")
 
 	_ = tmux.SelectPane(sessionName, paneIDs[0])
 	return tmux.AttachSession(sessionName)
