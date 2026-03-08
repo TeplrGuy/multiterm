@@ -1,87 +1,52 @@
 ---
 name: multiterm
-description: 'Terminal pane manager for visible agent work. When inside a multiterm session, use MCP tools (create_pane, run_in_pane, read_pane) to make all work visible instead of running invisibly in the background.'
+description: 'Terminal pane manager for visible agent work. Use MCP tools (create_pane, run_in_pane, read_pane) to make all work visible instead of running invisibly in the background. Works from ANY Copilot CLI session after running multiterm setup.'
 tools: Bash
 ---
 
 # multiterm — Visible Agent Work
 
-You are inside a multiterm terminal session. You have access to MCP tools that let you
-manage terminal panes. **Always prefer visible panes over invisible background work.**
+You have access to MCP tools that manage terminal panes via multiterm.
+**Always prefer visible panes over invisible background work.**
+
+If no multiterm session exists, the tools will auto-create one. Tell the
+user to run `tmux attach -t mt-copilot` in another terminal to watch.
 
 ## Core Principle
 
-When you need to run commands, tests, builds, or any sub-task — open a **visible pane**
-so the user can see what's happening in real time. The user hates invisible background
-processes.
+When you need to run commands, tests, builds, or any long-running task — open a
+**visible pane** so the user can see what is happening in real time.
 
 ## Available MCP Tools
 
-### `create_pane`
-Open a new terminal pane with a label and optional command.
-```
-name: "test-runner"
-command: "npm test"
-```
+| Tool | Purpose |
+|------|---------|
+| `create_pane` | Open a labeled pane with an optional command |
+| `run_in_pane` | Execute a command in an existing pane |
+| `read_pane` | Capture output from a pane (default 50 lines) |
+| `list_panes` | List all panes with IDs, names, and commands |
+| `close_pane` | Clean up a pane when its task is done |
+| `broadcast` | Send the same command to every pane |
 
-### `run_in_pane`
-Execute a command in an existing pane.
-```
-pane_id: "%5"
-command: "go build ./..."
-```
+## When to Use Panes
 
-### `read_pane`
-Capture output from a pane to see results.
-```
-pane_id: "%5"
-lines: 50
-```
-
-### `list_panes`
-See all active panes with their IDs and names.
-
-### `close_pane`
-Clean up a pane when its task is done.
-```
-pane_id: "%5"
-```
-
-### `broadcast`
-Send the same command to every pane at once.
-```
-command: "git pull"
-```
+- **Running tests**: `create_pane("tests", "go test ./...")` then `read_pane`
+- **Building**: `create_pane("build", "make build")` then `read_pane`
+- **Log tailing**: `create_pane("logs", "tail -f app.log")`
+- **Multiple commands**: one pane per task so user sees everything
+- **Sub-agent work**: always visible, never invisible
 
 ## Workflow
 
-1. **Before running a task**: Create a named pane for it
-2. **Run the command** in that pane
-3. **Read the output** to check results
-4. **Close the pane** when done (or leave it for the user)
-
-## Example: Running Tests
-
-```
-1. create_pane(name="tests", command="npm test")
-2. Wait a moment for tests to run
-3. read_pane(pane_id=<id from step 1>, lines=30)
-4. Analyze results and report to user
-```
-
-## Example: Multi-Service Setup
-
-```
-1. create_pane(name="api", command="npm run dev")
-2. create_pane(name="frontend", command="cd frontend && npm start")
-3. create_pane(name="db", command="docker compose up db")
-4. list_panes() to confirm everything is running
-```
+1. `list_panes` — check what is already running
+2. `create_pane` — open a pane for the new task
+3. `run_in_pane` — execute in an existing pane if reusing
+4. `read_pane` — capture output to verify results
+5. `close_pane` — clean up when done (optional)
 
 ## Guidelines
 
-- **Label panes clearly** — use descriptive names like "test-runner", "build", "logs"
-- **Read output** after commands complete to verify success
-- **Don't close panes** with long-running services unless asked
-- **Use broadcast** for operations that should hit all panes (like git pull)
-- **Check MULTITERM_SESSION env var** — if it's set, you're inside multiterm
+- Always label panes clearly (e.g. "tests", "build", "deploy")
+- Read output after commands complete to verify success
+- Do not close panes running long-lived services unless asked
+- Use broadcast for operations that apply to all panes

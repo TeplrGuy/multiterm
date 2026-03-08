@@ -29,11 +29,12 @@
 - 📋 **Profiles** — save and reuse workspace setups
 - 🔄 **Broadcast mode** — type in all panes simultaneously (`--sync`)
 - 🌐 **SSH multi-host** — one pane per server (`--hosts s1,s2,s3`)
-- 🤖 **Copilot profile** — built-in GitHub Copilot CLI integration
+- 🤖 **Copilot integration** — MCP server + skill + agent for visible agent work
 - 🖱️ **Mouse support** — click any pane to focus and type
 - 🔧 **Auto-install** — installs tmux via Homebrew if missing
 - 💾 **Session save** — capture your layout as a reusable profile
 - ➕ **Dynamic panes** — add panes on-the-fly with `Ctrl-b A` or `multiterm add`
+- ⚡ **Universal setup** — one command makes multiterm available in ALL Copilot sessions
 
 ## Install
 
@@ -102,6 +103,7 @@ Commands:
   init            Create a default ~/.multiterm.yaml config file
   save            Save current session as a reusable profile
   add             Add a new pane to a running session
+  setup           Set up multiterm for ALL Copilot CLI sessions (one-time)
   copilot         Launch Copilot CLI with MCP pane integration
   serve           Start MCP server (for Copilot CLI integration)
   install-agent   Install the multiterm Copilot agent globally
@@ -167,10 +169,33 @@ multiterm --hosts user@web1,user@web2,user@web3 --sync
 needs to run tests, build code, or spawn agents — it opens a visible pane instead
 of working invisibly in the background.
 
-### Quick Start
+### Universal Setup (Recommended)
+
+Run once to make multiterm available in **every** Copilot CLI session:
 
 ```bash
-# Launch Copilot with full pane integration (recommended)
+multiterm setup
+```
+
+This registers multiterm globally — no special launch command needed. From any
+Copilot CLI session, Copilot can now open visible panes for its work.
+
+What `setup` installs:
+- **Global MCP server** → `~/.copilot/mcp-config.json`
+- **User skill** → `~/.copilot/skills/multiterm/SKILL.md`
+- **Agent** → `~/.copilot/agents/multiterm.agent.md`
+
+To watch agent work, open another terminal and run:
+```bash
+tmux attach -t mt-copilot
+```
+
+### Dedicated Copilot Mode
+
+For a dedicated Copilot workspace with side panes:
+
+```bash
+# Launch Copilot with full pane integration
 multiterm copilot
 
 # With more side panes
@@ -189,6 +214,8 @@ multiterm copilot --model gpt-4.1
 └────────────────────────┴─────────────────┘
 ```
 
+### MCP Tools
+
 Copilot automatically gets access to these MCP tools:
 
 | Tool | What it does |
@@ -200,36 +227,19 @@ Copilot automatically gets access to these MCP tools:
 | `close_pane` | Close a specific pane |
 | `broadcast` | Send a command to all panes at once |
 
-### MCP Server (Manual Setup)
+### Auto-Session
 
-If you want to add multiterm to your own MCP config:
+If no multiterm session exists when Copilot uses a tool, one is auto-created
+(`mt-copilot`). No manual setup needed — just `multiterm setup` once and forget.
 
-```bash
-# Start the MCP server directly
-multiterm serve
-```
+### Manual MCP Setup
 
-Add to `~/.copilot/mcp-config.json`:
-
-```json
-{
-  "multiterm": {
-    "type": "stdio",
-    "command": "multiterm",
-    "args": ["serve"]
-  }
-}
-```
-
-### Install the Copilot Agent
-
-Install the multiterm agent globally so Copilot always knows how to use panes:
+If you prefer manual configuration instead of `multiterm setup`:
 
 ```bash
-multiterm install-agent
+multiterm serve          # Start MCP server
+multiterm install-agent  # Install the Copilot agent
 ```
-
-This copies the agent to `~/.copilot/agents/multiterm.agent.md`.
 
 ### Legacy Profile
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/TeplrGuy/multiterm/internal/tmux"
@@ -35,8 +36,11 @@ func Serve(version string) error {
 	return server.ServeStdio(s)
 }
 
+const autoSessionName = "mt-copilot"
+
 // resolveSession finds the target session name.
-// If session is provided, use it. Otherwise find the most recent mt-* session.
+// If session is provided, use it. If not, find the most recent mt-* session.
+// If no sessions exist at all, auto-create a detached mt-copilot session.
 func resolveSession(session string) (string, error) {
 	if session != "" {
 		if !tmux.SessionExists(session) {
@@ -49,10 +53,28 @@ func resolveSession(session string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to list sessions: %w", err)
 	}
-	if len(sessions) == 0 {
-		return "", fmt.Errorf("no multiterm sessions running — start one with: multiterm")
+	if len(sessions) > 0 {
+		return sessions[len(sessions)-1], nil
 	}
-	return sessions[len(sessions)-1], nil
+
+	// No sessions — auto-create one so Copilot always has a workspace
+	if err := createAutoSession(); err != nil {
+		return "", fmt.Errorf("failed to auto-create session: %w", err)
+	}
+	fmt.Fprintf(os.Stderr, "✦ Auto-created session %s — view with: tmux attach -t %s\n", autoSessionName, autoSessionName)
+	return autoSessionName, nil
+}
+
+// createAutoSession creates a detached mt-copilot session with 2 panes.
+func createAutoSession() error {
+	if err := tmux.NewSession(autoSessionName); err != nil {
+		return err
+	}
+	if _, err := tmux.SplitVertical(autoSessionName, "0"); err != nil {
+		fmt.Fprintf(os.Stderr, "⚠ Could not split pane: %v\n", err)
+	}
+	tmux.ConfigureSession(autoSessionName)
+	return nil
 }
 
 func getString(args map[string]any, key string) string {

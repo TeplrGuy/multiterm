@@ -2,6 +2,8 @@ package mcp
 
 import (
 	"context"
+	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -149,5 +151,51 @@ func TestHandleBroadcast_MissingCommand(t *testing.T) {
 	}
 	if !result.IsError {
 		t.Error("expected error result for missing command")
+	}
+}
+
+func TestAutoSessionName(t *testing.T) {
+	if autoSessionName != "mt-copilot" {
+		t.Errorf("autoSessionName = %q, want %q", autoSessionName, "mt-copilot")
+	}
+}
+
+func TestResolveSession_ExplicitNotFound(t *testing.T) {
+	_, err := resolveSession("mt-does-not-exist-12345")
+	if err == nil {
+		t.Fatal("expected error for nonexistent explicit session")
+	}
+	if !strings.Contains(err.Error(), "not found") {
+		t.Errorf("error should mention 'not found', got: %v", err)
+	}
+}
+
+func TestResolveSession_AutoCreate(t *testing.T) {
+	// Skip if tmux is not available
+	if _, err := exec.LookPath("tmux"); err != nil {
+		t.Skip("tmux not available")
+	}
+
+	// Clean up any existing auto-session
+	exec.Command("tmux", "kill-session", "-t", autoSessionName).Run()
+
+	// Resolve with empty string should auto-create
+	session, err := resolveSession("")
+	if err != nil {
+		// May fail if other mt-* sessions exist; that's OK
+		if strings.Contains(err.Error(), "auto-create") {
+			t.Fatalf("auto-create failed: %v", err)
+		}
+		// If it found an existing session, that's fine too
+		return
+	}
+
+	if session == "" {
+		t.Fatal("resolveSession returned empty session name")
+	}
+
+	// If it auto-created, clean up
+	if session == autoSessionName {
+		exec.Command("tmux", "kill-session", "-t", autoSessionName).Run()
 	}
 }
