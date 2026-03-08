@@ -128,6 +128,9 @@ func runRoot(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create session: %w", err)
 	}
 
+	// Enable mouse mode, pane borders, and status bar.
+	tmux.ConfigureSession(sessionName)
+
 	// Get the first pane's ID.
 	firstPane, err := tmux.FirstPaneID(sessionName)
 	if err != nil {
@@ -179,6 +182,10 @@ func runRoot(cmd *cobra.Command, args []string) error {
 
 	// Print info and attach.
 	fmt.Printf("✦ multiterm — %d panes [%s] session: %s\n", paneCount, layoutName, sessionName)
+	fmt.Println("  Click any pane to switch focus. Ctrl-b d to detach.")
+
+	// Focus the first pane.
+	_ = tmux.SelectPane(sessionName, paneIDs[0])
 
 	return tmux.AttachSession(sessionName)
 }

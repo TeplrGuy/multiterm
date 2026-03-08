@@ -154,3 +154,38 @@ func SelectLayout(session string, layout string) error {
 	target := fmt.Sprintf("%s:0", session)
 	return runSilent("select-layout", "-t", target, layout)
 }
+
+// SetOption sets a tmux session option.
+func SetOption(session string, option string, value string) error {
+	return runSilent("set-option", "-t", session, option, value)
+}
+
+// SetGlobalOption sets a tmux server-wide option.
+func SetGlobalOption(option string, value string) error {
+	return runSilent("set-option", "-g", option, value)
+}
+
+// ConfigureSession applies sensible defaults so every pane is independently
+// interactive: mouse mode on, pane borders visible, and status bar info.
+func ConfigureSession(session string) {
+	// Mouse mode — click any pane to focus and type in it.
+	_ = SetOption(session, "mouse", "on")
+
+	// Visual pane borders with colour distinction.
+	_ = SetOption(session, "pane-border-style", "fg=colour240")
+	_ = SetOption(session, "pane-active-border-style", "fg=colour51,bold")
+
+	// Show pane index in the border so the user knows which is which.
+	_ = SetOption(session, "pane-border-status", "top")
+	_ = SetOption(session, "pane-border-format", " #{pane_index}: #{pane_current_command} ")
+
+	// Status bar shows session name.
+	_ = SetOption(session, "status-left", " ✦ multiterm ")
+	_ = SetOption(session, "status-style", "bg=colour236,fg=colour75")
+}
+
+// SelectPane sets the active pane in the session.
+func SelectPane(session string, paneID string) error {
+	target := paneTarget(session, paneID)
+	return runSilent("select-pane", "-t", target)
+}
