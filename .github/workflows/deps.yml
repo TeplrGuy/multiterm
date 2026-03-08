@@ -51,7 +51,7 @@ jobs:
           tmux kill-server 2>/dev/null || true
 
       - name: Create PR if deps changed
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "chore(deps): update Go dependencies"
           title: "chore(deps): weekly Go dependency update"
