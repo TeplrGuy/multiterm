@@ -99,11 +99,14 @@ multiterm [pane-count] [flags]
 multiterm [command]
 
 Commands:
-  init        Create a default ~/.multiterm.yaml config file
-  save        Save current session as a reusable profile
-  add         Add a new pane to a running session
-  list        List active multiterm sessions
-  kill        Kill a multiterm session
+  init            Create a default ~/.multiterm.yaml config file
+  save            Save current session as a reusable profile
+  add             Add a new pane to a running session
+  copilot         Launch Copilot CLI with MCP pane integration
+  serve           Start MCP server (for Copilot CLI integration)
+  install-agent   Install the multiterm Copilot agent globally
+  list            List active multiterm sessions
+  kill            Kill a multiterm session
 
 Flags:
   -n, --count int         Number of panes (default: 6)
@@ -158,21 +161,82 @@ multiterm --hosts user@web1,user@web2,user@db1
 multiterm --hosts user@web1,user@web2,user@web3 --sync
 ```
 
-## Copilot Profile
+## Copilot CLI Integration
 
-Launch GitHub Copilot CLI alongside your terminal shells:
+**The killer feature**: Copilot CLI gets full pane management via MCP. When Copilot
+needs to run tests, build code, or spawn agents — it opens a visible pane instead
+of working invisibly in the background.
+
+### Quick Start
 
 ```bash
-multiterm -p copilot
+# Launch Copilot with full pane integration (recommended)
+multiterm copilot
+
+# With more side panes
+multiterm copilot --panes 4
+
+# With a specific model
+multiterm copilot --model gpt-4.1
 ```
 
 ```
 ┌─ copilot ──────────────┬─ shell-1 ──────┐
 │                        │                 │
-│  GitHub Copilot CLI    ├─ shell-2 ──────┤
-│  Ask me anything...    │                 │
+│  Copilot CLI           ├─ shell-2 ──────┤
+│  (MCP tools enabled)   │                 │
 │                        │                 │
 └────────────────────────┴─────────────────┘
+```
+
+Copilot automatically gets access to these MCP tools:
+
+| Tool | What it does |
+|------|-------------|
+| `create_pane` | Open a new labeled pane with a command |
+| `run_in_pane` | Execute a command in an existing pane |
+| `read_pane` | Capture output from any pane |
+| `list_panes` | List all panes with IDs and names |
+| `close_pane` | Close a specific pane |
+| `broadcast` | Send a command to all panes at once |
+
+### MCP Server (Manual Setup)
+
+If you want to add multiterm to your own MCP config:
+
+```bash
+# Start the MCP server directly
+multiterm serve
+```
+
+Add to `~/.copilot/mcp-config.json`:
+
+```json
+{
+  "multiterm": {
+    "type": "stdio",
+    "command": "multiterm",
+    "args": ["serve"]
+  }
+}
+```
+
+### Install the Copilot Agent
+
+Install the multiterm agent globally so Copilot always knows how to use panes:
+
+```bash
+multiterm install-agent
+```
+
+This copies the agent to `~/.copilot/agents/multiterm.agent.md`.
+
+### Legacy Profile
+
+The simple Copilot profile still works:
+
+```bash
+multiterm -p copilot
 ```
 
 Main pane (60%) runs `copilot`, side panes are interactive shells.

@@ -231,6 +231,24 @@ func SelectPane(session string, paneID string) error {
 	return runSilent("select-pane", "-t", target)
 }
 
+// CapturePane captures the visible content of a pane.
+// Returns up to `lines` lines from the bottom of the pane scrollback.
+func CapturePane(session string, paneID string, lines int) (string, error) {
+	target := paneTarget(session, paneID)
+	start := fmt.Sprintf("-%d", lines)
+	out, err := run("capture-pane", "-p", "-t", target, "-S", start)
+	if err != nil {
+		return "", fmt.Errorf("capture pane %s: %w", target, err)
+	}
+	return out, nil
+}
+
+// ClosePane closes a specific pane in the session.
+func ClosePane(session string, paneID string) error {
+	target := paneTarget(session, paneID)
+	return runSilent("send-keys", "-t", target, "exit", "Enter")
+}
+
 // ListPaneInfo returns info about all panes in a session.
 type PaneInfo struct {
 	ID    string

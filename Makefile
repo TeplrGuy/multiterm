@@ -17,7 +17,7 @@ clean:
 	rm -f multiterm
 
 test:
-	go test ./...
+	go test ./... -count=1 -timeout 60s
 
 lint:
 	go vet ./...

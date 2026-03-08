@@ -119,9 +119,9 @@ func runRoot(cmd *cobra.Command, args []string) error {
 
 	// Profile overrides.
 	if flagProfile != "" {
-		// Check built-in profiles first.
 		if flagProfile == "copilot" {
-			return runCopilotProfile(cfg)
+			fmt.Println("Tip: use 'multiterm copilot' for full Copilot CLI integration with MCP tools.")
+			return runCopilotLegacy(cfg)
 		}
 		profile, err := config.GetProfile(cfg, flagProfile)
 		if err != nil {
@@ -320,9 +320,10 @@ func runSSHMultiHost(cfg *config.Config) error {
 	return tmux.AttachSession(sessionName)
 }
 
-// runCopilotProfile launches the built-in Copilot profile:
+// runCopilotLegacy launches the built-in Copilot profile:
 // main-side layout with Copilot CLI in the main pane and shells on the side.
-func runCopilotProfile(cfg *config.Config) error {
+// Deprecated: use 'multiterm copilot' for full MCP integration.
+func runCopilotLegacy(cfg *config.Config) error {
 	paneCount := 3
 	layoutName := "main-side"
 
