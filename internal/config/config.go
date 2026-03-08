@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -100,6 +101,41 @@ func InitConfig() error {
 	}
 
 	return os.WriteFile(path, []byte(defaultConfigYAML), 0644)
+}
+
+// SaveProfile adds or updates a named profile in the config file.
+func SaveProfile(cfg *Config, name string, profile Profile) error {
+	if cfg.Profiles == nil {
+		cfg.Profiles = make(map[string]Profile)
+	}
+	cfg.Profiles[name] = profile
+
+	data, err := marshalConfig(cfg)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(ConfigPath(), data, 0644)
+}
+
+func marshalConfig(cfg *Config) ([]byte, error) {
+	var b strings.Builder
+	b.WriteString("defaults:\n")
+	b.WriteString(fmt.Sprintf("  count: %d\n", cfg.Defaults.Count))
+	b.WriteString(fmt.Sprintf("  layout: %s\n", cfg.Defaults.Layout))
+	b.WriteString("\nprofiles:\n")
+
+	for name, p := range cfg.Profiles {
+		b.WriteString(fmt.Sprintf("  %s:\n", name))
+		b.WriteString(fmt.Sprintf("    count: %d\n", p.Count))
+		b.WriteString(fmt.Sprintf("    layout: %s\n", p.Layout))
+		b.WriteString("    commands:\n")
+		for _, cmd := range p.Commands {
+			b.WriteString(fmt.Sprintf("      - %q\n", cmd))
+		}
+	}
+
+	return []byte(b.String()), nil
 }
 
 func validate(cfg *Config) error {

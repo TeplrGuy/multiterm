@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install tmux
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            sudo apt-get update && sudo apt-get install -y tmux
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            brew install tmux || true
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Build
+        run: go build -o multiterm .
+
+      - name: Verify binary runs
+        run: |
+          ./multiterm --version
+          ./multiterm --help
+          ./multiterm list
+
+      - name: Integration test
+        run: |
+          # Start a tmux server and test session creation
+          tmux start-server || true
+          
+          # Test that multiterm can create and manage sessions
+          ./multiterm 4 -l grid &
+          sleep 3
+          
+          # Verify session was created
+          SESSION=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | grep "^mt-" | head -1)
+          if [ -z "$SESSION" ]; then
+            echo "FAIL: No multiterm session created"
+            exit 1
+          fi
+          
+          # Verify correct pane count
+          PANE_COUNT=$(tmux list-panes -t "$SESSION" 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$PANE_COUNT" -ne 4 ]; then
+            echo "FAIL: Expected 4 panes, got $PANE_COUNT"
+            exit 1
+          fi
+          
+          echo "PASS: Session $SESSION created with $PANE_COUNT panes"
+          
+          # Cleanup
+          tmux kill-server 2>/dev/null || true

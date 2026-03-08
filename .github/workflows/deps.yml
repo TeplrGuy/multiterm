@@ -1,0 +1,67 @@
+name: Dependencies
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"  # Every Monday at 9am UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install tmux
+        run: sudo apt-get update && sudo apt-get install -y tmux
+
+      - name: Update Go dependencies
+        run: |
+          go get -u ./...
+          go mod tidy
+
+      - name: Build after update
+        run: go build -o multiterm .
+
+      - name: Vet after update
+        run: go vet ./...
+
+      - name: Verify binary
+        run: ./multiterm --version && ./multiterm --help
+
+      - name: Integration smoke test
+        run: |
+          tmux start-server || true
+          ./multiterm 2 -l vertical &
+          sleep 3
+          SESSION=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | grep "^mt-" | head -1)
+          if [ -z "$SESSION" ]; then
+            echo "FAIL: No session created after dep update"
+            exit 1
+          fi
+          PANES=$(tmux list-panes -t "$SESSION" 2>/dev/null | wc -l | tr -d ' ')
+          echo "PASS: $PANES panes created"
+          tmux kill-server 2>/dev/null || true
+
+      - name: Create PR if deps changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(deps): update Go dependencies"
+          title: "chore(deps): weekly Go dependency update"
+          body: |
+            Automated weekly dependency update.
+            
+            - Ran `go get -u ./...` and `go mod tidy`
+            - Build passes ✅
+            - Vet passes ✅
+            - Integration test passes ✅
+          branch: deps/weekly-update
+          delete-branch: true
+          labels: dependencies

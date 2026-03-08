@@ -35,9 +35,9 @@ changelog:
 
 brews:
   - repository:
-      owner: gilbertappiah
+      owner: TeplrGuy
       name: homebrew-tap
-    homepage: "https://github.com/gilbertappiah/multiterm"
+    homepage: "https://github.com/TeplrGuy/multiterm"
     description: "Open multiple terminal panes instantly with smart layouts"
     license: "MIT"
     install: |
