@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/gilbertappiah/multiterm/cmd"
+	"github.com/TeplrGuy/multiterm/cmd"
 )
 
 func main() {

@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gilbertappiah/multiterm/internal/config"
-	"github.com/gilbertappiah/multiterm/internal/layout"
-	"github.com/gilbertappiah/multiterm/internal/setup"
-	"github.com/gilbertappiah/multiterm/internal/tmux"
+	"github.com/TeplrGuy/multiterm/internal/config"
+	"github.com/TeplrGuy/multiterm/internal/layout"
+	"github.com/TeplrGuy/multiterm/internal/setup"
+	"github.com/TeplrGuy/multiterm/internal/tmux"
 	"github.com/spf13/cobra"
 )
 

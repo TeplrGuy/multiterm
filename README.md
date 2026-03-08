@@ -5,7 +5,7 @@
 [![CI](https://github.com/TeplrGuy/multiterm/actions/workflows/ci.yml/badge.svg)](https://github.com/TeplrGuy/multiterm/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/TeplrGuy/multiterm)](https://github.com/TeplrGuy/multiterm/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/gilbertappiah/multiterm)](https://goreportcard.com/report/github.com/gilbertappiah/multiterm)
+[![Go Report Card](https://goreportcard.com/badge/github.com/TeplrGuy/multiterm)](https://goreportcard.com/report/github.com/TeplrGuy/multiterm)
 
 ```
 ┌──────────┬──────────┬──────────┐
@@ -39,13 +39,13 @@
 ### Homebrew (macOS & Linux)
 
 ```bash
-brew install gilbertappiah/tap/multiterm
+brew install TeplrGuy/tap/multiterm
 ```
 
 ### Go Install
 
 ```bash
-go install github.com/gilbertappiah/multiterm@latest
+go install github.com/TeplrGuy/multiterm@latest
 ```
 
 ### Download Binary

@@ -3,7 +3,7 @@
 VERSION ?= dev
 
 build:
-	go build -ldflags "-s -w -X github.com/gilbertappiah/multiterm/cmd.version=$(VERSION)" -o multiterm .
+	go build -ldflags "-s -w -X github.com/TeplrGuy/multiterm/cmd.version=$(VERSION)" -o multiterm .
 
 install: build
 	mkdir -p $(HOME)/.local/bin

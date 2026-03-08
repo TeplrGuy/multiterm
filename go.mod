@@ -1,4 +1,4 @@
-module github.com/gilbertappiah/multiterm
+module github.com/TeplrGuy/multiterm
 
 go 1.26.1
 
