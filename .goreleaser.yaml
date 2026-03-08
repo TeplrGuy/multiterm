@@ -1,0 +1,46 @@
+project_name: multiterm
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - main: .
+    binary: multiterm
+    ldflags:
+      - -s -w -X github.com/gilbertappiah/multiterm/cmd.version={{.Version}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+brews:
+  - repository:
+      owner: gilbertappiah
+      name: homebrew-tap
+    homepage: "https://github.com/gilbertappiah/multiterm"
+    description: "Open multiple terminal panes instantly with smart layouts"
+    license: "MIT"
+    install: |
+      bin.install "multiterm"
+    test: |
+      system "#{bin}/multiterm", "--version"
