@@ -33,6 +33,7 @@
 - 🖱️ **Mouse support** — click any pane to focus and type
 - 🔧 **Auto-install** — installs tmux via Homebrew if missing
 - 💾 **Session save** — capture your layout as a reusable profile
+- ➕ **Dynamic panes** — add panes on-the-fly with `Ctrl-b A` or `multiterm add`
 
 ## Install
 
@@ -100,6 +101,7 @@ multiterm [command]
 Commands:
   init        Create a default ~/.multiterm.yaml config file
   save        Save current session as a reusable profile
+  add         Add a new pane to a running session
   list        List active multiterm sessions
   kill        Kill a multiterm session
 
@@ -291,6 +293,30 @@ multiterm kill mt-1709901234
 multiterm kill --all
 ```
 
+## Add Panes Dynamically
+
+Already in a session with 3 panes but need more? No need to restart:
+
+### From inside tmux
+
+Press **`Ctrl-b A`** — a new pane appears and the layout auto-tiles.
+
+### From another terminal
+
+```bash
+# Add a plain shell pane to the latest session
+multiterm add
+
+# Add a named pane with a command
+multiterm add -c "logs:tail -f app.log"
+
+# Add to a specific session
+multiterm add mt-1709901234
+
+# Split vertically instead of auto-tiling
+multiterm add --vertical
+```
+
 ## Keyboard Shortcuts
 
 Inside a multiterm session, standard tmux keybindings work:
@@ -298,6 +324,7 @@ Inside a multiterm session, standard tmux keybindings work:
 | Shortcut | Action |
 |----------|--------|
 | **Click pane** | Switch focus to that pane |
+| `Ctrl-b A` | Add a new pane and auto-tile the layout |
 | `Ctrl-b B` | Toggle broadcast mode (sync input to all panes) |
 | `Ctrl-b d` | Detach from session (keeps it running) |
 | `Ctrl-b arrow` | Navigate between panes |
@@ -350,4 +377,4 @@ make lint     # Run go vet
 
 ## License
 
-[MIT](LICENSE) © Gilbert Appiah
+[MIT](LICENSE)
