@@ -167,30 +167,28 @@ func gridSplits(count int) []Split {
 }
 
 // verticalSplits creates (count-1) horizontal splits so panes stack top-to-bottom.
+// Always splits from pane 0 so tmux has maximum space for each new split.
 func verticalSplits(count int) []Split {
 	splits := make([]Split, 0, count-1)
 	for i := 1; i < count; i++ {
-		remaining := count - i + 1
-		pct := 100 / remaining
 		splits = append(splits, Split{
 			Direction:  SplitV,
-			TargetPane: i - 1,
-			Percentage: pct,
+			TargetPane: 0,
+			Percentage: 50,
 		})
 	}
 	return splits
 }
 
 // horizontalSplits creates (count-1) vertical splits so panes sit side-by-side.
+// Always splits from pane 0 so tmux has maximum space for each new split.
 func horizontalSplits(count int) []Split {
 	splits := make([]Split, 0, count-1)
 	for i := 1; i < count; i++ {
-		remaining := count - i + 1
-		pct := 100 / remaining
 		splits = append(splits, Split{
 			Direction:  SplitH,
-			TargetPane: i - 1,
-			Percentage: pct,
+			TargetPane: 0,
+			Percentage: 50,
 		})
 	}
 	return splits

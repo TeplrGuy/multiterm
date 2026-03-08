@@ -200,7 +200,7 @@ func runRoot(cmd *cobra.Command, args []string) error {
 		_ = tmux.SetSyncPanes(sessionName, true)
 	}
 
-	fmt.Printf("✦ multiterm — %d panes [%s] session: %s\n", paneCount, layoutName, sessionName)
+	fmt.Printf("✦ multiterm — %d panes [%s] session: %s\n", len(paneIDs), layoutName, sessionName)
 	fmt.Println("  Click any pane │ Ctrl-b A: add pane │ Ctrl-b B: sync │ Ctrl-b d: detach")
 
 	_ = tmux.SelectPane(sessionName, paneIDs[0])
@@ -208,6 +208,9 @@ func runRoot(cmd *cobra.Command, args []string) error {
 }
 
 // createSession creates a tmux session and splits panes according to the plan.
+// After each split, the layout is reapplied so tmux redistributes space evenly,
+// preventing "no space for new pane" errors. If a split fails due to terminal
+// size constraints, the session continues with the panes that were created.
 func createSession(sessionName string, plan *layout.LayoutPlan) ([]string, error) {
 	if err := tmux.NewSession(sessionName); err != nil {
 		return nil, fmt.Errorf("failed to create session: %w", err)
@@ -237,15 +240,21 @@ func createSession(sessionName string, plan *layout.LayoutPlan) ([]string, error
 			newPaneID, err = tmux.SplitHorizontal(sessionName, target)
 		}
 		if err != nil {
+			if strings.Contains(err.Error(), "no space") {
+				fmt.Fprintf(os.Stderr, "⚠  Terminal too small for %d panes — using %d (resize terminal for more)\n",
+					plan.Count, len(paneIDs))
+				// Fall back to tiled layout which handles any arrangement.
+				_ = tmux.SelectLayout(sessionName, "tiled")
+				return paneIDs, nil
+			}
 			_ = tmux.KillSession(sessionName)
 			return nil, fmt.Errorf("failed to create pane: %w", err)
 		}
 		paneIDs = append(paneIDs, newPaneID)
-	}
 
-	if plan.TmuxLayoutName != "" {
-		if err := tmux.SelectLayout(sessionName, plan.TmuxLayoutName); err != nil {
-			fmt.Fprintf(os.Stderr, "warning: could not apply layout: %v\n", err)
+		// Reapply layout after each split so tmux redistributes space evenly.
+		if plan.TmuxLayoutName != "" {
+			_ = tmux.SelectLayout(sessionName, plan.TmuxLayoutName)
 		}
 	}
 
